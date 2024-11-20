@@ -14,7 +14,6 @@ This is a simple and efficient cache proxy server built using Golang. The server
     git clone https://github.com/balajiss36/cache-proxy.git
     cd cache-proxy
     ```
-
 2. **Build the server**:
     ```sh
     go build -o cache-proxy
