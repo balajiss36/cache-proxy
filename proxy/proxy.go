@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -8,13 +9,18 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
+
+	"github.com/balajiss36/cache-proxy/cache"
 )
 
 type Proxy struct {
 	Context context.Context
 	URL     string `json:"url"`
 	Port    string `json:"port"`
+	// this acts as a interface between cache and proxy to run the cache functions in proxy server
+	Cache cache.CacheService
 }
 
 var customTransport = http.DefaultTransport
@@ -43,7 +49,26 @@ func (p *Proxy) StartServer() error {
 }
 
 func (p *Proxy) handleRequest(w http.ResponseWriter, r *http.Request) {
+	path := strings.TrimPrefix(r.URL.Path, "/")
+
 	uri := fmt.Sprintf("%s%s", p.URL, r.URL.Path)
+	log.Println("URI: & path ", uri, r.URL.Path)
+	val, err := p.Cache.Get(path)
+	if err != nil {
+		log.Printf("Error while getting cache for key %s err %s", path, err)
+	}
+	if val != nil {
+		log.Println("Cache hit")
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, err = io.Copy(w, bytes.NewReader(val))
+		if err != nil {
+			http.Error(w, "Error copying response", http.StatusInternalServerError)
+			return
+		}
+		return
+	}
+
 	proxyReq, err := http.NewRequest(http.MethodGet, uri, nil)
 	if err != nil {
 		http.Error(w, "Error creating proxy request", http.StatusInternalServerError)
@@ -56,12 +81,21 @@ func (p *Proxy) handleRequest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer resp.Body.Close()
-
-	w.WriteHeader(resp.StatusCode)
-
-	_, err = io.Copy(w, resp.Body)
+	res, err := io.ReadAll(resp.Body)
 	if err != nil {
-		http.Error(w, "Error copying response", http.StatusInternalServerError)
+		http.Error(w, "Error marshalling response", http.StatusInternalServerError)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	_, err = io.Copy(w, bytes.NewReader(res))
+	if err != nil {
+		http.Error(w, "Error writing response", http.StatusInternalServerError)
 		return
+	}
+
+	err = p.Cache.Set(path, res)
+	log.Println("Setting cache for key", path)
+	if err != nil {
+		log.Println("Error while setting cache")
 	}
 }

@@ -19,9 +19,9 @@ This is a simple and efficient cache proxy server built using Golang. The server
     go build -o cache-proxy
     ```
 
-3. **Run the server**:
+3. **Start the server**:
     ```sh
-    ./cache-proxy --url http://example.com --port 8080
+    ./cache-proxy start --url http://example.com --port 8080
     ```
 
 #### Dependencies:

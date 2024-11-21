@@ -18,10 +18,11 @@ One can use proxy to start or stop the server which will cache the responses fro
 	},
 }
 
-func Execute() {
+func Execute() error {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintf(os.Stderr, "error while executing your CLI command '%s'", err)
 		os.Exit(1)
-		return
+		return err
 	}
+	return nil
 }

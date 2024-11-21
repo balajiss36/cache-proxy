@@ -1,7 +1,18 @@
 package main
 
-import "github.com/balajiss36/cache-proxy/cli"
+import (
+	"log"
+	"os"
+
+	"github.com/balajiss36/cache-proxy/cli"
+)
 
 func main() {
-	cli.Execute()
+	log.Println("Starting the CLI for cache-proxy")
+	err := cli.Execute()
+	if err != nil {
+		log.Fatalf("Error while executing the CLI: %v", err)
+		os.Exit(1)
+		return
+	}
 }

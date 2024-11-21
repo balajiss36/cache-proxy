@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/balajiss36/cache-proxy/cache"
 	"github.com/balajiss36/cache-proxy/proxy"
 	"github.com/spf13/cobra"
 )
@@ -14,7 +15,6 @@ var startCmd = &cobra.Command{
 	Use:     "start",
 	Short:   "start",
 	Aliases: []string{"start"},
-	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		portNumber, err := cmd.Flags().GetString("port")
 		if err != nil {
@@ -26,10 +26,14 @@ var startCmd = &cobra.Command{
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
+
+		cache := cache.NewCache()
+
 		proxy := proxy.Proxy{
 			Context: ctx,
 			Port:    portNumber,
 			URL:     url,
+			Cache:   cache,
 		}
 
 		err = proxy.StartServer()
