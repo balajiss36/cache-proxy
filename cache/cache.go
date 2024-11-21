@@ -46,7 +46,6 @@ func (c *Cache) Get(key string) ([]byte, error) {
 		log.Println("Cache expired")
 		return nil, err
 	}
-	log.Println("Cache not expired")
 	return val, err
 }
 

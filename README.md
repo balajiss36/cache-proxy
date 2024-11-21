@@ -9,19 +9,13 @@ This is a simple and efficient cache proxy server built using Golang. The server
 - **Modular Design**: Separation of concerns for better maintainability and testability.
 
 #### Usage:
-1. **Clone the repository**:
+1. **Install the package**:
     ```sh
-    git clone https://github.com/balajiss36/cache-proxy.git
-    cd cache-proxy
+    go install github.com/balajiss36/cache-proxy
     ```
-2. **Build the server**:
+2. **Start the server**:
     ```sh
-    go build -o cache-proxy
-    ```
-
-3. **Start the server**:
-    ```sh
-    ./cache-proxy start --url http://example.com --port 8080
+    cache-proxy start --url http://example.com --port 8080
     ```
 
 #### Dependencies:
